@@ -5,7 +5,7 @@ from bravado.client import SwaggerClient
 from bravado.swagger_model import load_file
 from simplejson import JSONDecodeError
 
-from models import Project
+from models import Project, MapToken
 from exceptions import RefreshTokenException
 
 
@@ -71,6 +71,29 @@ class API(object):
         except JSONDecodeError:
             raise RefreshTokenException('Error using refresh token, please '
                                         'verify it is valid')
+
+    @property
+    def map_tokens(self):
+        """List map tokens a user has access to
+
+        Returns:
+            List[MapToken]
+        """
+
+        has_next = True
+        page = 0
+        map_tokens = []
+        while has_next:
+            paginated_map_tokens = (
+                self.client.Imagery.get_map_tokens(page=page).result()
+            )
+            map_tokens += [
+                MapToken(map_token, self)
+                for map_token in paginated_map_tokens.results
+            ]
+            page = paginated_map_tokens.page + 1
+            has_next = paginated_map_tokens.hasNext
+        return map_tokens
 
     @property
     def projects(self):

@@ -9,6 +9,7 @@ if NOTEBOOK_SUPPORT:
     )
 
 from ..decorators import check_notebook  # NOQA
+from .map_token import MapToken
 
 
 class Project(object):
@@ -101,6 +102,19 @@ class Project(object):
     def get_layer(self):
         """Returns a TileLayer for display using ipyleaflet"""
         return TileLayer(url=self.tms())
+
+    def get_map_token(self):
+        """Returns the map token for this project
+
+        Returns:
+            str
+        """
+
+        resp = (
+            self.api.client.Imagery.get_map_tokens(projectId=self.id).result()
+        )
+        if resp.results:
+            return MapToken(resp.results[0], self.api)
 
     def tms(self):
         """Return a TMS URL for a project"""
