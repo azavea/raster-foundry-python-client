@@ -984,6 +984,7 @@ paths:
       tags:
         - Imagery
       parameters:
+        - $ref: '#/parameters/page'
         - $ref: '#/parameters/projectId'
         - $ref: '#/parameters/organization'
         - $ref: '#/parameters/createdBy'
@@ -1642,7 +1643,7 @@ parameters:
     type: string
     format: uuid
   projectId:
-    name: projectId
+    name: project
     in: query
     description: UUID for project
     type: string
@@ -1977,13 +1978,8 @@ definitions:
           type: string
           description: Human friendly label for map token
         project:
-          type: object
-          properties:
-            id:
-              type: string
-              format: UUID
-            name:
-              type: string
+          type: string
+          format: uuid
   MapTokenPaginated:
     allOf:
     - $ref: '#/definitions/PaginatedResponse'
