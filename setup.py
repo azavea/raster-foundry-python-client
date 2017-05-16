@@ -21,7 +21,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['tests']),
     package_data={'': ['*.yml']},
     install_requires=[
-        'cryptography >= 1.3.2',
+        'cryptography == 1.8.1',
         'pyasn1 >= 0.2.3',
         'requests >= 2.9.1',
         'bravado >= 8.4.0'
