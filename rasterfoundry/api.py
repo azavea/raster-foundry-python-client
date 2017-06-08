@@ -49,6 +49,7 @@ class API(object):
         elif not api_token:
             raise Exception('Must provide either a refresh token or API token')
 
+        self.api_token = api_token
         self.http.session.headers['Authorization'] = 'Bearer {}'.format(
             api_token)
 

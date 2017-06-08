@@ -137,10 +137,11 @@ class Project(object):
         """Return a TMS URL for a project"""
 
         tile_path = self.TILE_PATH_TEMPLATE.format(id=self.id)
-        return '{scheme}://{host}{tile_path}'.format(
+        path = '{scheme}://{host}{tile_path}'.format(
             scheme=self.api.scheme, host=self.api.tile_host,
             tile_path=tile_path
         )
+        return path + '?token={}'.format(self.api.api_token)
 
     @check_notebook
     def add_to(self, leaflet_map):
