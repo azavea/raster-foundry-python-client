@@ -112,4 +112,4 @@ class Upload(object):
             Upload: created object in Raster Foundry
         """
 
-        return api.client.Imagery.post_uploads(upload=upload_create).result()
+        return api.client.Imagery.post_uploads(Upload=upload_create).result()
