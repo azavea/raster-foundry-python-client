@@ -114,3 +114,9 @@ class API(object):
             for project in paginated_projects.results:
                 projects.append(Project(project, self))
         return projects
+
+    def get_datasources(self, **kwargs):
+        return self.client.Datasources.get_datasources(**kwargs).result()
+
+    def get_scenes(self, **kwargs):
+        return self.client.Imagery.get_scenes(**kwargs).result()
