@@ -93,13 +93,10 @@ class Project(object):
             scheme=self.api.scheme, host=self.api.tile_host,
             export_path=export_path
         )
-        map_token = self.get_map_token()
-        if not map_token:
-            raise "Project {} has not yet been shared".format(self.id)
 
         return requests.get(
             request_path,
-            params={'bbox': bbox, 'zoom': zoom, 'mapToken': map_token.token},
+            params={'bbox': bbox, 'zoom': zoom, 'token': self.api.api_token},
             headers=headers
         )
 
@@ -137,11 +134,10 @@ class Project(object):
         """Return a TMS URL for a project"""
 
         tile_path = self.TILE_PATH_TEMPLATE.format(id=self.id)
-        path = '{scheme}://{host}{tile_path}'.format(
+        return '{scheme}://{host}{tile_path}?token={token}'.format(
             scheme=self.api.scheme, host=self.api.tile_host,
-            tile_path=tile_path
+            tile_path=tile_path, token=self.api.api_token
         )
-        return path + '?token={}'.format(self.api.api_token)
 
     @check_notebook
     def add_to(self, leaflet_map):
