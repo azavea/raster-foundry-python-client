@@ -1058,6 +1058,8 @@ paths:
         - $ref: '#/parameters/projectId'
         - $ref: '#/parameters/organization'
         - $ref: '#/parameters/createdBy'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/project'
       responses:
         200:
           description: Paginated list of map tokens
@@ -2120,13 +2122,8 @@ definitions:
           type: string
           description: Human friendly label for map token
         project:
-          type: object
-          properties:
-            id:
-              type: string
-              format: UUID
-            name:
-              type: string
+          type: string
+          format: uuid
   MapTokenPaginated:
     allOf:
     - $ref: '#/definitions/PaginatedResponse'
