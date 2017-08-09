@@ -119,4 +119,9 @@ class API(object):
         return self.client.Datasources.get_datasources(**kwargs).result()
 
     def get_scenes(self, **kwargs):
+        bbox = kwargs.get('bbox')
+        if bbox and hasattr(bbox, 'bounds'):
+            kwargs['bbox'] = ','.join(str(x) for x in bbox.bounds)
+        elif bbox and type(bbox) != type(','.join(str(x) for x in bbox)): # NOQA
+            kwargs['bbox'] = ','.join(str(x) for x in bbox)
         return self.client.Imagery.get_scenes(**kwargs).result()

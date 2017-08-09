@@ -506,6 +506,7 @@ paths:
         - $ref: '#/parameters/project'
         - $ref: '#/parameters/ingested'
         - $ref: '#/parameters/ingestStatus'
+        - $ref: '#/parameters/forProjectId'
       responses:
         200:
           description: Paginated list of scenes
@@ -1804,6 +1805,13 @@ parameters:
     in: path
     required: true
     type: string
+  forProjectId:
+    name: forProjectId
+    description: UUID of the project to search for scenes to add
+    in: query
+    type: string
+    format: uuid
+    required: false
   minCloudCover:
     name: minCloudCover
     description: Only return results with cloud cover greater than this number
