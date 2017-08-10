@@ -20,5 +20,5 @@ deploy:
   on:
     tags: true
     distributions: sdist bdist_wheel
-    repo: azavea/raster-foundry-python-client
+    repo: raster-foundry/raster-foundry-python-client
     python: '3.6'

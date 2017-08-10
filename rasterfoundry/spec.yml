@@ -23,7 +23,7 @@ x-top-matter:
     content: |
       The Raster Foundry API allows developers to find, view, and analyze geospatial data in Raster Foundry. As the name implies, it's especially useful for working with large raster datasets like satellite imagery.
 
-      Raster Foundry is built with an openly licensed, open source code base. If you'd like to peek under the hood, make a request, or become a contributor, <a href="https://github.com/azavea/raster-foundry/issues" target="_blank">find us on Github</a>.
+      Raster Foundry is built with an openly licensed, open source code base. If you'd like to peek under the hood, make a request, or become a contributor, <a href="https://github.com/raster-foundry/raster-foundry/issues" target="_blank">find us on Github</a>.
   - title: Authentication
     level: 2
     content: |
@@ -63,7 +63,7 @@ x-resources:
     description: |
       "Datasources contain information common to all scenes associated with them, such as the number of bands to expect in images associated with that datasource. A datasource can be specific (e.g. a particular earth observation satellite) or generic (e.g. a 3-band sensor on a UAV). All scenes must have an associated datasource."
 
-      "Currently, datasources cannot be created through the API and must be requested (<a href="https://github.com/azavea/raster-foundry/issues" target="_blank">preferably as a Github issue in the source repository</a>)."
+      "Currently, datasources cannot be created through the API and must be requested (<a href="https://github.com/raster-foundry/raster-foundry/issues" target="_blank">preferably as a Github issue in the source repository</a>)."
 
       "In the future, users will be able to manage the creation, amendment, and deletion of datasources directly through the API. Also, users will be able to assign transformations like color correction, band composites, or color maps to datasources as a default for themselves and/or their organizations."
   - name: Tokens
