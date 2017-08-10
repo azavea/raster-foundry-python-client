@@ -5,8 +5,8 @@ from bravado.client import SwaggerClient
 from bravado.swagger_model import load_file
 from simplejson import JSONDecodeError
 
-from models import Project, MapToken
-from exceptions import RefreshTokenException
+from .models import Project, MapToken
+from .exceptions import RefreshTokenException
 
 
 SPEC_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
