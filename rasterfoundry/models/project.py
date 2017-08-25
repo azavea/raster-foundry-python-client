@@ -36,6 +36,20 @@ class Project(object):
         self.name = project.name
         self.id = project.id
 
+    @classmethod
+    def create(cls, api, project_create):
+        """Post a project to Raster Foundry
+
+        Args:
+            api (API): API to use for requests
+            project_create (dict): post parameters for /projects. See
+                project_create
+
+        Returns:
+            Project: created object in Raster Foundry
+        """
+        return api.client.Imagery.post_projects(project_create)
+
     def get_center(self):
         """Get the center of this project's extent"""
         coords = self._project.extent.get('coordinates')
