@@ -25,9 +25,27 @@ Usage
 Installation
 ------------
 
+Without notebook support
+~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. code:: bash
 
    $ pip install rasterfoundry
+
+With notebook support
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+   $ pip install rasterfoundry[notebook]
+
+Then, enable widgets and leaflet in in jupyter notebooks:
+
+.. code:: bash
+
+   $ jupyter nbextension enable --py --sys-prefix widgetsnbextension 
+   $ jupyter nbextension install --py --symlink --sys-prefix ipyleaflet
+   $ jupyter nbextension enable --py --sys-prefix ipyleaflet
 
 
 Testing
