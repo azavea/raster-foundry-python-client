@@ -35,6 +35,8 @@ Without notebook support
 With notebook support
 ~~~~~~~~~~~~~~~~~~~~~
 
+Notebook support requires [`npm`](https://www.npmjs.com/get-npm).
+
 .. code:: bash
 
    $ pip install rasterfoundry[notebook]
