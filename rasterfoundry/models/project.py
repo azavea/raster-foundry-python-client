@@ -89,7 +89,7 @@ class Project(object):
         PNGs will be returned if the export_format is anything other than tiff
 
         Args:
-            bbox (str): GeoJSON format bounding box for the download
+            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
             export_format (str): Requested download format
 
         Returns:
@@ -120,7 +120,7 @@ class Project(object):
         The returned string is the raw bytes of the associated geotiff.
 
         Args:
-            bbox (str): GeoJSON format bounding box for the download
+            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
             zoom (int): zoom level for the export
 
         Returns:
@@ -135,7 +135,7 @@ class Project(object):
         The returned string is the raw bytes of the associated png.
 
         Args:
-            bbox (str): GeoJSON format bounding box for the download
+            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
             zoom (int): zoom level for the export
 
         Returns
