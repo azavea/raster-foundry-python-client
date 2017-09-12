@@ -3,3 +3,7 @@
 
 class RefreshTokenException(Exception):
     pass
+
+
+class GatewayTimeoutException(Exception):
+    pass

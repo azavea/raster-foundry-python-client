@@ -3,6 +3,7 @@ import requests
 
 from .. import NOTEBOOK_SUPPORT
 from ..decorators import check_notebook
+from ..exceptions import GatewayTimeoutException
 from .map_token import MapToken
 
 if NOTEBOOK_SUPPORT:
@@ -108,11 +109,18 @@ class Project(object):
             export_path=export_path
         )
 
-        return requests.get(
+        response = requests.get(
             request_path,
             params={'bbox': bbox, 'zoom': zoom, 'token': self.api.api_token},
             headers=headers
         )
+        if response.status_code == requests.codes.gateway_timeout:
+            raise GatewayTimeoutException(
+                'The export request timed out. '
+                'Try decreasing the zoom level or using a smaller bounding box.'
+            )
+        response.raise_for_status()
+        return response
 
     def geotiff(self, bbox, zoom=10):
         """Download this project as a geotiff
