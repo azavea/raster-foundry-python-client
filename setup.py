@@ -30,13 +30,10 @@ setuptools.setup(
     extras_require={
         'notebook': [
             'notebook >= 4.0.0',
-            'ipyleaflet==0.4.0a1'
+            'az-ipyleaflet==0.4.1'
         ],
         'dev': [],
         'test': [],
     },
-    tests_require=[],
-    dependency_links=[
-        'https://github.com/azavea/ipyleaflet/tarball/0.4.0a/'
-    ]
+    tests_require=[]
 )
