@@ -8,7 +8,7 @@ Usage
 
 .. code-block:: python
 
-   from rf.api import API
+   from rasterfoundry.api import API
    refresh_token = '<>'
 
    api = API(refresh_token=refresh_token)
