@@ -1,5 +1,8 @@
 """A Project is a collection of zero or more scenes"""
 import requests
+import uuid
+
+import boto3
 
 from .. import NOTEBOOK_SUPPORT
 from ..decorators import check_notebook
@@ -12,6 +15,42 @@ if NOTEBOOK_SUPPORT:
         SideBySideControl,
         TileLayer,
     )
+
+RV_CPU_QUEUE = 'raster-vision-cpu'
+RV_CPU_JOB_DEF = 'raster-vision-cpu'
+DEVELOP_BRANCH = 'develop'
+
+
+def start_raster_vision_job(job_name, command, job_queue=RV_CPU_QUEUE,
+                            job_definition=RV_CPU_JOB_DEF,
+                            branch_name=DEVELOP_BRANCH, attempts=1):
+    """Start a raster-vision Batch job.
+
+    Args:
+        job_name (str): name of the Batch job
+        command (str): command to run inside the Docker container
+        job_queue (str): name of the Batch job queue to run the job in
+        job_definition (str): name of the Batch job definition
+        branch_name (str): branch of the raster-vision repo to use
+        attempts (int): number of attempts for the Batch job
+
+    Returns:
+        job_id (str): job_id of job started on Batch
+    """
+    batch_client = boto3.client('batch')
+    # `run_script.sh $branch_name $command` downloads a branch of the
+    # raster-vision repo and then runs the command.
+    job_command = ['run_script.sh', branch_name, command]
+    job_id = batch_client.submit_job(
+        jobName=job_name, jobQueue=job_queue, jobDefinition=job_definition,
+        containerOverrides={
+            'command': job_command
+        },
+        retryStrategy={
+            'attempts': attempts
+        })['jobId']
+
+    return job_id
 
 
 class Project(object):
@@ -160,6 +199,51 @@ class Project(object):
             scheme=self.api.scheme, host=self.api.tile_host,
             tile_path=tile_path, token=self.api.api_token
         )
+
+    def get_image_source_uris(self):
+        """Return the sourceUris of images associated with this project"""
+        source_uris = []
+        scenes = self.api.client.Imagery.get_projects_uuid_scenes(uuid=self.id) \
+                     .result().results
+        for scene in scenes:
+            for image in scene.images:
+                source_uris.append(image.sourceUri)
+
+        return source_uris
+
+    def start_predict_job(self, inference_graph_uri, label_map_uri,
+                          predictions_uri, job_queue=RV_CPU_QUEUE,
+                          job_definition=RV_CPU_JOB_DEF,
+                          branch_name=DEVELOP_BRANCH, attempts=1):
+        """Start a Batch job to perform object detection on this project.
+
+        Args:
+            inference_graph_uri (str): file with exported object detection
+                model file
+            label_map_uri (str): file with mapping from class id to display name
+            predictions_uri (str): GeoJSON file output by the prediction job
+            job_queue (str): name of the Batch job queue to run the job in
+            job_definition (str): name of the Batch job definition
+            branch_name (str): branch of the raster-vision repo to use
+            attempts (int): number of attempts for the Batch job
+
+        Returns:
+            job_id (str): job_id of job started on Batch
+        """
+        source_uris = self.get_image_source_uris()
+        source_uris_str = ' '.join(source_uris)
+
+        # Add uuid to job_name because it has to be unique.
+        job_name = 'predict_project_{}_{}'.format(self.id, uuid.uuid1())
+        command = 'python -m rv.run predict {} {} {} {}'.format(
+            inference_graph_uri, label_map_uri, source_uris_str,
+            predictions_uri)
+        job_id = start_raster_vision_job(
+            job_name, command, job_queue=job_queue,
+            job_definition=job_definition, branch_name=branch_name,
+            attempts=attempts)
+
+        return job_id
 
     @check_notebook
     def add_to(self, leaflet_map):
