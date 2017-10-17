@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from bravado.requests_client import RequestsClient
 from bravado.client import SwaggerClient
@@ -7,7 +8,9 @@ from simplejson import JSONDecodeError
 
 from .models import Project, MapToken
 from .exceptions import RefreshTokenException
-
+from .utils import start_raster_vision_job, upload_raster_vision_config
+from .settings import (
+    RV_CPU_JOB_DEF, RV_CPU_QUEUE, DEVELOP_BRANCH, RV_CONFIG_URI_ROOT)
 
 SPEC_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          'spec.yml')
@@ -125,3 +128,67 @@ class API(object):
         elif bbox and type(bbox) != type(','.join(str(x) for x in bbox)): # NOQA
             kwargs['bbox'] = ','.join(str(x) for x in bbox)
         return self.client.Imagery.get_scenes(**kwargs).result()
+
+    def get_project_configs(self, project_ids, annotation_uris):
+        """Get data needed to create project config file for prep_train_data
+
+        The prep_train_data script requires a project config files which
+        lists the images and annotation URIs associated with each project
+        that will be used to generate training data.
+
+        Args:
+            project_ids: list of project ids to make training data from
+            annotation_uris: list of corresponding annotation URIs
+
+        Returns:
+            Object of form [{'images': [...], 'annotations':...}, ...]
+        """
+        project_configs = []
+        for project_id, annotation_uri in zip(project_ids, annotation_uris):
+            proj = Project(
+                self.client.Imagery.get_projects_uuid(uuid=project_id).result(),
+                self)
+            image_uris = proj.get_image_source_uris()
+            project_configs.append({
+                'images': image_uris,
+                'annotations': annotation_uri
+            })
+
+        return project_configs
+
+    def start_prep_train_data_job(self, project_ids, annotation_uris,
+                                  output_zip_uri,
+                                  config_uri_root=RV_CONFIG_URI_ROOT,
+                                  job_queue=RV_CPU_QUEUE,
+                                  job_definition=RV_CPU_JOB_DEF,
+                                  branch_name=DEVELOP_BRANCH, attempts=1):
+        """Start a Batch job to prepare object detection training data.
+
+        Args:
+            project_ids (list of str): ids of projects to make train data for
+            annotation_uris (list of str): annotation URIs for projects
+            output_zip_uri (str): URI of output zip file
+            config_uri_root (str): The root of generated URIs for config files
+            job_queue (str): name of the Batch job queue to run the job in
+            job_definition (str): name of the Batch job definition
+            branch_name (str): branch of the raster-vision repo to use
+            attempts (int): number of attempts for the Batch job
+
+        Returns:
+            job_id (str): job_id of job started on Batch
+        """
+        project_configs = self.get_project_configs(
+            project_ids, annotation_uris)
+        config_uri = upload_raster_vision_config(
+            project_configs, config_uri_root)
+
+        command = ('python -m rv.run prep_train_data --debug ' +
+                   '--chip-size 300 --num-neg-chips 100 ' +
+                   '--max-attempts 500 {} {}').format(
+                       config_uri, output_zip_uri)
+
+        job_name = 'prep_train_data_{}'.format(uuid.uuid1())
+        job_id = start_raster_vision_job(
+            job_name, command, job_queue, job_definition, branch_name,
+            attempts=attempts)
+        return job_id

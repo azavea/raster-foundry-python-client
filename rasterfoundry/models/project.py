@@ -2,12 +2,13 @@
 import requests
 import uuid
 
-import boto3
-
 from .. import NOTEBOOK_SUPPORT
 from ..decorators import check_notebook
 from ..exceptions import GatewayTimeoutException
+from ..utils import start_raster_vision_job
+from ..settings import RV_CPU_JOB_DEF, RV_CPU_QUEUE, DEVELOP_BRANCH
 from .map_token import MapToken
+
 
 if NOTEBOOK_SUPPORT:
     from ipyleaflet import (
@@ -15,42 +16,6 @@ if NOTEBOOK_SUPPORT:
         SideBySideControl,
         TileLayer,
     )
-
-RV_CPU_QUEUE = 'raster-vision-cpu'
-RV_CPU_JOB_DEF = 'raster-vision-cpu'
-DEVELOP_BRANCH = 'develop'
-
-
-def start_raster_vision_job(job_name, command, job_queue=RV_CPU_QUEUE,
-                            job_definition=RV_CPU_JOB_DEF,
-                            branch_name=DEVELOP_BRANCH, attempts=1):
-    """Start a raster-vision Batch job.
-
-    Args:
-        job_name (str): name of the Batch job
-        command (str): command to run inside the Docker container
-        job_queue (str): name of the Batch job queue to run the job in
-        job_definition (str): name of the Batch job definition
-        branch_name (str): branch of the raster-vision repo to use
-        attempts (int): number of attempts for the Batch job
-
-    Returns:
-        job_id (str): job_id of job started on Batch
-    """
-    batch_client = boto3.client('batch')
-    # `run_script.sh $branch_name $command` downloads a branch of the
-    # raster-vision repo and then runs the command.
-    job_command = ['run_script.sh', branch_name, command]
-    job_id = batch_client.submit_job(
-        jobName=job_name, jobQueue=job_queue, jobDefinition=job_definition,
-        containerOverrides={
-            'command': job_command
-        },
-        retryStrategy={
-            'attempts': attempts
-        })['jobId']
-
-    return job_id
 
 
 class Project(object):

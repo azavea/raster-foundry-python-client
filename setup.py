@@ -25,7 +25,8 @@ setuptools.setup(
         'pyasn1 >= 0.2.3',
         'requests >= 2.9.1',
         'bravado >= 8.4.0',
-        'boto3 >= 1.4.4'
+        'boto3 >= 1.4.4',
+        'future >= 0.16.0'
     ],
     extras_require={
         'notebook': [
