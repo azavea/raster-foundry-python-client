@@ -8,9 +8,9 @@ from simplejson import JSONDecodeError
 
 from .models import Project, MapToken
 from .exceptions import RefreshTokenException
-from .utils import start_raster_vision_job, upload_raster_vision_config
 from .settings import (
     RV_CPU_JOB_DEF, RV_CPU_QUEUE, DEVELOP_BRANCH, RV_CONFIG_URI_ROOT)
+from .utils import upload_raster_vision_config
 
 SPEC_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          'spec.yml')
@@ -156,15 +156,17 @@ class API(object):
 
         return project_configs
 
-    def start_prep_train_data_job(self, project_ids, annotation_uris,
                                   output_zip_uri,
                                   config_uri_root=RV_CONFIG_URI_ROOT,
                                   job_queue=RV_CPU_QUEUE,
                                   job_definition=RV_CPU_JOB_DEF,
                                   branch_name=DEVELOP_BRANCH, attempts=1):
+    def start_prep_train_data_job(self, rv_batch_client, project_ids,
         """Start a Batch job to prepare object detection training data.
 
         Args:
+            rv_batch_client: a RasterVisionBatchClient object used to start
+                Batch jobs
             project_ids (list of str): ids of projects to make train data for
             annotation_uris (list of str): annotation URIs for projects
             output_zip_uri (str): URI of output zip file
@@ -188,7 +190,5 @@ class API(object):
                        config_uri, output_zip_uri)
 
         job_name = 'prep_train_data_{}'.format(uuid.uuid1())
-        job_id = start_raster_vision_job(
-            job_name, command, job_queue, job_definition, branch_name,
-            attempts=attempts)
+        job_id = rv_batch_client.start_raster_vision_job(job_name, command)
         return job_id

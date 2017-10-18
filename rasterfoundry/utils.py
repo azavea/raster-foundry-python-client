@@ -8,36 +8,51 @@ import json
 
 import boto3
 
+from .settings import RV_CPU_JOB_DEF, RV_CPU_QUEUE, DEVELOP_BRANCH
 
-def start_raster_vision_job(job_name, command, job_queue, job_definition,
-                            branch_name, attempts=1):
-    """Start a raster-vision Batch job.
 
-    Args:
-        job_name (str): name of the Batch job
-        command (str): command to run inside the Docker container
-        job_queue (str): name of the Batch job queue to run the job in
-        job_definition (str): name of the Batch job definition
-        branch_name (str): branch of the raster-vision repo to use
-        attempts (int): number of attempts for the Batch job
+class RasterVisionBatchClient():
+    def __init__(self, job_queue=RV_CPU_QUEUE, job_definition=RV_CPU_JOB_DEF,
+                 branch_name=DEVELOP_BRANCH, attempts=1):
+        """Create a Raster Vision Batch Client
 
-    Returns:
-        job_id (str): job_id of job started on Batch
-    """
-    batch_client = boto3.client('batch')
-    # `run_script.sh $branch_name $command` downloads a branch of the
-    # raster-vision repo and then runs the command.
-    job_command = ['run_script.sh', branch_name, command]
-    job_id = batch_client.submit_job(
-        jobName=job_name, jobQueue=job_queue, jobDefinition=job_definition,
-        containerOverrides={
-            'command': job_command
-        },
-        retryStrategy={
-            'attempts': attempts
-        })['jobId']
+        Args:
+            job_queue (str): name of the Batch job queue to run the job in
+            job_definition (str): name of the Batch job definition
+            branch_name (str): branch of the raster-vision repo to use
+            attempts (int): number of attempts for each job
+        """
 
-    return job_id
+        self.job_queue = job_queue
+        self.job_definition = job_definition
+        self.branch_name = branch_name
+        self.attempts = attempts
+        self.batch_client = boto3.client('batch')
+
+    def start_raster_vision_job(self, job_name, command):
+        """Start a raster-vision Batch job.
+
+        Args:
+            job_name (str): name of the Batch job
+            command (str): command to run inside the Docker container
+
+        Returns:
+            job_id (str): job_id of job started on Batch
+        """
+        # `run_script.sh $branch_name $command` downloads a branch of the
+        # raster-vision repo and then runs the command.
+        job_command = ['run_script.sh', self.branch_name, command]
+        job_id = self.batch_client.submit_job(
+            jobName=job_name, jobQueue=self.job_queue,
+            jobDefinition=self.job_definition,
+            containerOverrides={
+                'command': job_command
+            },
+            retryStrategy={
+                'attempts': self.attempts
+            })['jobId']
+
+        return job_id
 
 
 def upload_raster_vision_config(config_dict, config_uri_root):

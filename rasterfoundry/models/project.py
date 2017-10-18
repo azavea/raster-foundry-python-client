@@ -5,8 +5,6 @@ import uuid
 from .. import NOTEBOOK_SUPPORT
 from ..decorators import check_notebook
 from ..exceptions import GatewayTimeoutException
-from ..utils import start_raster_vision_job
-from ..settings import RV_CPU_JOB_DEF, RV_CPU_QUEUE, DEVELOP_BRANCH
 from .map_token import MapToken
 
 
@@ -176,13 +174,13 @@ class Project(object):
 
         return source_uris
 
-    def start_predict_job(self, inference_graph_uri, label_map_uri,
-                          predictions_uri, job_queue=RV_CPU_QUEUE,
-                          job_definition=RV_CPU_JOB_DEF,
-                          branch_name=DEVELOP_BRANCH, attempts=1):
+    def start_predict_job(self, rv_batch_client, inference_graph_uri,
+                          label_map_uri, predictions_uri):
         """Start a Batch job to perform object detection on this project.
 
         Args:
+            rv_batch_client: instance of RasterVisionBatchClient used to start
+                Batch jobs
             inference_graph_uri (str): file with exported object detection
                 model file
             label_map_uri (str): file with mapping from class id to display name
@@ -203,10 +201,7 @@ class Project(object):
         command = 'python -m rv.run predict {} {} {} {}'.format(
             inference_graph_uri, label_map_uri, source_uris_str,
             predictions_uri)
-        job_id = start_raster_vision_job(
-            job_name, command, job_queue=job_queue,
-            job_definition=job_definition, branch_name=branch_name,
-            attempts=attempts)
+        job_id = rv_batch_client.start_raster_vision_job(job_name, command)
 
         return job_id
 
