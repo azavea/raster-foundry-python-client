@@ -86,7 +86,7 @@ class Project(object):
         if resp.results:
             return MapToken(resp.results[0], self.api)
 
-    def get_export(self, bbox, zoom=10, export_format='png'):
+    def get_export(self, bbox, zoom=10, export_format='png', raw=False):
         """Download this project as a file
 
         PNGs will be returned if the export_format is anything other than tiff
@@ -113,7 +113,12 @@ class Project(object):
 
         response = requests.get(
             request_path,
-            params={'bbox': bbox, 'zoom': zoom, 'token': self.api.api_token},
+            params={
+                'bbox': bbox,
+                'zoom': zoom,
+                'token': self.api.api_token,
+                'colorCorrect': 'false' if raw else 'true'
+            },
             headers=headers
         )
         if response.status_code == requests.codes.gateway_timeout:
@@ -124,7 +129,7 @@ class Project(object):
         response.raise_for_status()
         return response
 
-    def geotiff(self, bbox, zoom=10):
+    def geotiff(self, bbox, zoom=10, raw=False):
         """Download this project as a geotiff
 
         The returned string is the raw bytes of the associated geotiff.
@@ -137,9 +142,9 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'tiff').content
+        return self.get_export(bbox, zoom, 'tiff', raw).content
 
-    def png(self, bbox, zoom=10):
+    def png(self, bbox, zoom=10, raw=False):
         """Download this project as a png
 
         The returned string is the raw bytes of the associated png.
@@ -152,7 +157,7 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'png').content
+        return self.get_export(bbox, zoom, 'png', raw).content
 
     def tms(self):
         """Return a TMS URL for a project"""

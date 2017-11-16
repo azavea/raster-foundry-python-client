@@ -63,7 +63,7 @@ x-resources:
     description: |
       "Datasources contain information common to all scenes associated with them, such as the number of bands to expect in images associated with that datasource. A datasource can be specific (e.g. a particular earth observation satellite) or generic (e.g. a 3-band sensor on a UAV). All scenes must have an associated datasource."
 
-      "Currently, datasources cannot be created through the API and must be requested (<a href="https://github.com/raster-foundry/raster-foundry/issues" target="_blank">preferably as a Github issue in the source repository</a>)."
+      "Currently, datasources cannot be created through the API and must be requested (<a href="https://github.com/azavea/raster-foundry/issues" target="_blank">preferably as a Github issue in the source repository</a>)."
 
       "In the future, users will be able to manage the creation, amendment, and deletion of datasources directly through the API. Also, users will be able to assign transformations like color correction, band composites, or color maps to datasources as a default for themselves and/or their organizations."
   - name: Tokens
@@ -165,7 +165,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     patch:
-      summary: Update user profile
+      summary: Update user profile information
       parameters:
         - name: Profile
           in: body
@@ -178,6 +178,27 @@ paths:
           description: Profile updated
           schema:
             $ref: '#/definitions/Auth0User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      summary:
+        Update user api tokens
+      tags:
+        - Users
+      parameters:
+        - name: User
+          in: body
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        204:
+          description: No Content
+        404:
+          description: User not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -717,6 +738,90 @@ paths:
           description: The UUID parameter does not refer to a project or the user does not have access to the project it refers to
           schema:
             $ref: '#/definitions/Error'
+
+  /projects/{uuid}/annotations/:
+    x-resource: Projects
+    get:
+      summary: Get all annotations belonging to a project
+      tags:
+        - Imagery
+      parameters:
+        - $ref: '#/parameters/uuid'
+        - $ref: '#/parameters/AnnotationLabel'
+        - $ref: '#/parameters/AnnotationQualityCheck'
+      responses:
+        200:
+          description: GeoJSON feature collection containing paginated annotations of this project
+          schema:
+            $ref: '#/definitions/AnnotationFeatureCollectionPaginated'
+
+    post:
+      summary: Create annotations of this project
+      tags:
+        - Imagery
+      parameters:
+        - $ref: '#/parameters/uuid'
+        - name: annotations
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AnnotationFeatureCollectionCreate'
+      responses:
+        201:
+          description: GeoJSON annotations successfully created
+          schema:
+            $ref: '#/definitions/AnnotationFeatureCollection'
+        default:
+          description: Unexpected error.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /projects/{uuid}/annotations/{uuid2}:
+    x-resouce: Projects
+    get:
+      summary: Get an annotation belonging to a project
+      tags:
+        - Imagery
+      parameters:
+        - $ref: '#/parameters/uuid'
+        - $ref: '#/parameters/uuid2'
+      responses:
+        200:
+          description: GeoJSON feature containing one annotation from this project
+          schema:
+            $ref: '#/definitions/AnnotationFeature'
+
+    put:
+      summary: Update an annotation of this project
+      tags:
+        - Imagery
+      parameters:
+        - $ref: '#/parameters/uuid'
+        - $ref: '#/parameters/uuid2'
+        - name: annotation
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AnnotationFeatureUpdate'
+      responses:
+        204:
+          description: No content, update successful
+
+    delete:
+      summary: Delete an annotation
+      tags:
+        - Imagery
+      parameters:
+        - $ref: '#/parameters/uuid'
+        - $ref: '#/parameters/uuid2'
+      responses:
+        204:
+          description: Deletion successful.
+        404:
+          description: The UUID parameter does not refer to an annotation or the user does not have access to the project it refers to.
+          schema:
+            $ref: '#/definitions/Error'
+
 
   /projects/{uuid}/areas-of-interest/:
     x-resource: Projects
@@ -1752,6 +1857,21 @@ parameters:
         - createdAt,asc
         - modifiedAt,desc
         - modifiedAt,asc
+  AnnotationQualityCheck:
+    name: AnnotationQualityCheck
+    description: Quality check on annotations
+    in: query
+    type: string
+    required: true
+    enum:
+      - PASS
+      - FAIL
+      - NEUTRAL
+  AnnotationLabel:
+    name: AnnotationLabel
+    in: query
+    description: name of a label
+    type: string
   name:
     name: name
     in: query
@@ -2102,6 +2222,18 @@ parameters:
       - ABORTED
 
 definitions:
+  RenderDefinition:
+    type: object
+    properties:
+      breakpoints:
+        type: object
+        description: mapping from a tile cell value to associated color
+      scale:
+        type: string
+        description: The type of scale to use (e.g. 'continuous', 'qualitative', 'diverging'); qualitative strings will contain a hex color (e.g. 'qualitative[#ff00ffff]')
+      clip:
+        type: string
+        description: The clipping strategy to use (e.g. 'left', 'right', 'both', 'none')
   BaseModel:
     type: object
     readOnly: true
@@ -2111,8 +2243,8 @@ definitions:
         description: unique identifier for object
         format: uuid
       organizationId:
-              type: string
-              description: uuid for organization
+        type: string
+        description: uuid for organization
   BaseCreate:
     type: object
     properties:
@@ -2131,7 +2263,10 @@ definitions:
           description: Human friendly label for map token
         project:
           type: string
-          format: uuid
+          format: UUID
+        toolRun:
+          type: string
+          format: UUID
   MapTokenPaginated:
     allOf:
     - $ref: '#/definitions/PaginatedResponse'
@@ -2312,6 +2447,9 @@ definitions:
         planetCredential:
           type: string
           description: Contains the user's planet credential if a connection has been configured
+        emailNotifications:
+          type: boolean
+          description: An opt-in (defaults to false) setting to recieve email notifications
   UserWithOAuth:
     type: object
     properties:
@@ -2476,17 +2614,22 @@ definitions:
         - id
   Geometry:
       type: object
-      description: GeoJSon geometry
+      description: GeoJSON geometry
       discriminator: type
       required:
         - type
       externalDocs:
-        url: http://geojson.org/geojson-spec.html#geometry-objects
+        url: https://tools.ietf.org/html/rfc7946#section-3.1
       properties:
         type:
           type: string
           enum:
             - MultiPolygon
+            - Polygon
+            - MultiLineString
+            - LineString
+            - MuliPoint
+            - Point
           description: the geometry type
   Point2D:
       type: array
@@ -2496,9 +2639,9 @@ definitions:
         type: number
   MultiPolygon:
       type: object
-      description: GeoJson geometry
+      description: GeoJSON geometry
       externalDocs:
-        url: http://geojson.org/geojson-spec.html#id6
+        url: https://tools.ietf.org/html/rfc7946#section-3.1
       allOf:
         - $ref: "#/definitions/Geometry"
         - properties:
@@ -2973,14 +3116,8 @@ definitions:
         execution_parameters:
           type: object
           description: Parameters for running the tool
-        project:
+        name:
           type: string
-          format: uuid
-          description: Project with which this run is associated
-        tool:
-          type: string
-          format: uuid
-          description: Tool being run
         visibility:
           type: string
           description: Level of restriction on viewing
@@ -3360,7 +3497,7 @@ definitions:
         description: epsg projection code
       mask:
         type: object
-        description: geojson multipolygon
+        description: GeoJSON multipolygon
       stitch:
         type: boolean
         description: stitch tiles into a single geotiff if possible
@@ -3397,7 +3534,7 @@ definitions:
         description: "required resolution (currently it's zoom level)"
       mask:
         type: object
-        description: geojson multipolygon
+        description: GeoJSON multipolygon
       layers:
         type: object
         properties:
@@ -3454,3 +3591,126 @@ definitions:
         items:
           type: string
           format: uuid
+
+  AnnotationFeature:
+    type: object
+    properties:
+      type:
+        type: string
+      properties:
+        allOf:
+        - $ref: '#/definitions/BaseModel'
+        - $ref: '#/definitions/TimeModelMixin'
+        - $ref: '#/definitions/UserTrackingMixin'
+        - type: object
+        properties:
+          label:
+            type: string
+          description:
+            type: string
+          machineGenerated:
+            type: boolean
+          confidence:
+            type: number
+            format: float
+          qualityCheck:
+            type: string
+            enum:
+              - YES
+              - NO
+              - MISS
+              - MATCH
+          projectId:
+            type: string
+            format: uuid
+      geometry:
+        $ref: "#/definitions/Geometry"
+
+  AnnotationFeatureUpdate:
+    type: object
+    properties:
+      type:
+        type: string
+      properties:
+        type: object
+        properties:
+          label:
+            type: string
+          description:
+            type: string
+          machineGenerated:
+            type: boolean
+          confidence:
+            type: number
+            format: float
+          qualityCheck:
+            type: string
+            enum:
+              - YES
+              - NO
+              - MISS
+              - MATCH
+      geometry:
+        $ref: "#/definitions/Geometry"
+
+  AnnotationFeatureCreate:
+    type: object
+    properties:
+      type:
+        type: string
+      properties:
+        allOf:
+        - $ref: '#/definitions/BaseCreate'
+        - type: object
+        properties:
+          label:
+            type: string
+          description:
+            type: string
+          machineGenerated:
+            type: boolean
+          confidence:
+            type: number
+            format: float
+          qualityCheck:
+            type: string
+            enum:
+              - YES
+              - NO
+              - MISS
+              - MATCH
+      geometry:
+        $ref: "#/definitions/Geometry"
+
+  AnnotationFeatureCollection:
+    type: object
+    properties:
+      type:
+        type: string
+      features:
+        type: array
+        items:
+          $ref: '#/definitions/AnnotationFeature'
+
+  AnnotationFeatureCollectionPaginated:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PaginatedResponse'
+      - type: object
+        properties:
+          type:
+            type: string
+          features:
+            type: array
+            items:
+              $ref: '#/definitions/AnnotationFeature'
+
+  AnnotationFeatureCollectionCreate:
+    type: object
+    properties:
+      type:
+        type: string
+      features:
+        type: array
+        items:
+          $ref: '#/definitions/AnnotationFeatureCreate'
