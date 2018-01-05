@@ -6,7 +6,7 @@ from bravado.client import SwaggerClient
 from bravado.swagger_model import load_file
 from simplejson import JSONDecodeError
 
-from .models import Project, MapToken
+from .models import Project, MapToken, Analysis
 from .exceptions import RefreshTokenException
 from .utils import upload_raster_vision_config
 from .settings import RV_PROJ_CONFIG_DIR_URI
@@ -116,6 +116,24 @@ class API(object):
             for project in paginated_projects.results:
                 projects.append(Project(project, self))
         return projects
+
+    @property
+    def analyses(self):
+        """List analyses a user has access to
+
+        Returns:
+            List[Analysis]
+        """
+        has_next = True
+        analyses = []
+        page = 0
+        while has_next:
+            paginated_analyses = self.client.Lab.get_tool_runs(page=page).result()
+            has_next = paginated_analyses.hasNext
+            page = paginated_analyses.page + 1
+            for analysis in paginated_analyses.results:
+                analyses.append(Analysis(analysis, self))
+        return analyses
 
     def get_datasources(self, **kwargs):
         return self.client.Datasources.get_datasources(**kwargs).result()
