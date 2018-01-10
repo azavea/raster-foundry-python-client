@@ -5,6 +5,8 @@ from os.path import join
 import tempfile
 import uuid
 import json
+import os
+import errno
 
 import boto3
 
@@ -78,3 +80,13 @@ def upload_raster_vision_config(config_dict, config_uri_root):
             config_file.name, parsed_uri.netloc, parsed_uri.path[1:])
 
         return config_uri
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise

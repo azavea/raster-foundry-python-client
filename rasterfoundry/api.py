@@ -1,4 +1,5 @@
 import os
+import json
 
 from bravado.requests_client import RequestsClient
 from bravado.client import SwaggerClient
@@ -7,6 +8,7 @@ from simplejson import JSONDecodeError
 
 from .models import Project, MapToken
 from .exceptions import RefreshTokenException
+from .utils import mkdir_p
 
 SPEC_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          'spec.yml')
@@ -146,11 +148,26 @@ class API(object):
                 self)
             image_uris = proj.get_image_source_uris()
             project_configs.append({
+                'id': project_id,
                 'images': image_uris,
                 'annotations': annotation_uri
             })
 
         return project_configs
 
+    def write_project_configs(self, project_ids, annotation_uris, output_path):
+        """Write project config file to disk.
+
+        This file is needed by Raster Vision to prepare training data, make
+        predictions, and evaluate predictions.
+
+        Args:
+            project_ids: list of project ids to make training data from
+            annotation_uris: list of corresponding annotation URIs
+            output_path: where to write the project config file
+        """
         project_configs = self.get_project_configs(
             project_ids, annotation_uris)
+        mkdir_p(os.path.dirname(output_path))
+        with open(output_path, 'w') as output_file:
+            json.dump(project_configs, output_file, sort_keys=True, indent=4)
