@@ -1,5 +1,4 @@
 import os
-import uuid
 
 from bravado.requests_client import RequestsClient
 from bravado.client import SwaggerClient
@@ -8,8 +7,6 @@ from simplejson import JSONDecodeError
 
 from .models import Project, MapToken
 from .exceptions import RefreshTokenException
-from .utils import upload_raster_vision_config
-from .settings import RV_PROJ_CONFIG_DIR_URI
 
 SPEC_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          'spec.yml')
@@ -155,101 +152,5 @@ class API(object):
 
         return project_configs
 
-    def start_prep_train_data_job(self, rv_batch_client, project_ids,
-                                  annotation_uris,
-                                  output_zip_uri, label_map_uri,
-                                  proj_config_dir_uri=RV_PROJ_CONFIG_DIR_URI,
-                                  min_area=None, single_label=None,
-                                  no_partial=True, channel_order=None):
-        """Start a Batch job to prepare object detection training data.
-
-        Args:
-            rv_batch_client: a RasterVisionBatchClient object used to start
-                Batch jobs
-            project_ids (list of str): ids of projects to make train data for
-            annotation_uris (list of str): annotation URIs for projects
-            output_zip_uri (str): URI of output zip file
-            label_map_uri (str): URI of output label map
-            proj_config_dir_uri (str): The root of generated URIs for config
-                files
-            min_area (float): minimum area of bounding boxes to include
-            single_label (str): Convert all labels to this label
-            no_partial (bool): Black out partially visible objects
-            channel_order: list of length 3 with GeoTIFF channel indices to
-                map to RGB.
-
-        Returns:
-            job_id (str): job_id of job started on Batch
-        """
         project_configs = self.get_project_configs(
             project_ids, annotation_uris)
-        config_uri = upload_raster_vision_config(
-            project_configs, proj_config_dir_uri)
-
-        base_command = \
-            'python -m rv.run prep_train_data --debug --chip-size 300 '
-        min_area_opt = ('--min-area {} '.format(min_area)
-                        if min_area is not None else '')
-        single_label_opt = ('--single-label {} '.format(single_label)
-                            if single_label is not None else '')
-        no_partial_opt = '--no-partial ' if no_partial else ''
-
-        channel_order_opt = ''
-        if channel_order is not None:
-            channel_order_str = ' '.join([
-                str(channel_ind) for channel_ind in channel_order])
-            channel_order_opt = ('--channel-order {} '
-                                 .format(channel_order_str))
-
-        command = (base_command + min_area_opt + single_label_opt +
-                   no_partial_opt + channel_order_opt + '{} {} {}')
-        command = command.format(config_uri, output_zip_uri, label_map_uri)
-
-        job_name = 'prep_train_data_{}'.format(uuid.uuid1())
-        job_id = rv_batch_client.start_raster_vision_job(job_name, command)
-        return job_id
-
-    def start_eval_model_job(self, rv_batch_client, inference_graph_uri,
-                             project_ids, annotation_uris, label_map_uri,
-                             output_uri,
-                             proj_config_dir_uri=RV_PROJ_CONFIG_DIR_URI,
-                             channel_order=None):
-        """Start a Batch job to evaluate a model using a set of projects.
-
-        Args:
-            rv_batch_client: a RasterVisionBatchClient object used to start
-                Batch jobs
-            project_ids (list of str): ids of projects to make train data for
-            annotation_uris (list of str): annotation URIs for projects
-            label_map_uri (str): URI of output label map
-            output_uri (str): URI of output zip file
-            proj_config_dir_uri (str): The root of generated URIs for config
-                files
-            channel_order: list of length 3 with GeoTIFF channel indices to
-                map to RGB.
-
-        Returns:
-            job_id (str): job_id of job started on Batch
-        """
-        project_configs = self.get_project_configs(
-            project_ids, annotation_uris)
-        projects_uri = upload_raster_vision_config(
-            project_configs, proj_config_dir_uri)
-
-        base_command = \
-            'python -m rv.run eval_model --chip-size 300 '
-
-        channel_order_opt = ''
-        if channel_order is not None:
-            channel_order_str = ' '.join([
-                str(channel_ind) for channel_ind in channel_order])
-            channel_order_opt = ('--channel-order {} '
-                                 .format(channel_order_str))
-
-        command = (base_command + channel_order_opt + '{} {} {} {}')
-        command = command.format(inference_graph_uri, projects_uri,
-                                 label_map_uri, output_uri)
-
-        job_name = 'eval_model_{}'.format(uuid.uuid1())
-        job_id = rv_batch_client.start_raster_vision_job(job_name, command)
-        return job_id
