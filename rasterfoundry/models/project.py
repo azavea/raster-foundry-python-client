@@ -180,7 +180,8 @@ class Project(object):
         return source_uris
 
     def start_predict_job(self, rv_batch_client, inference_graph_uri,
-                          label_map_uri, predictions_uri):
+                          label_map_uri, predictions_uri,
+                          channel_order=[0, 1, 2]):
         """Start a Batch job to perform object detection on this project.
 
         Args:
@@ -190,21 +191,17 @@ class Project(object):
                 model file
             label_map_uri (str): file with mapping from class id to display name
             predictions_uri (str): GeoJSON file output by the prediction job
-            job_queue (str): name of the Batch job queue to run the job in
-            job_definition (str): name of the Batch job definition
-            branch_name (str): branch of the raster-vision repo to use
-            attempts (int): number of attempts for the Batch job
-
+            channel_order (list of int)
         Returns:
             job_id (str): job_id of job started on Batch
         """
         source_uris = self.get_image_source_uris()
         source_uris_str = ' '.join(source_uris)
-
+        channel_order = ' '.join([str(channel) for channel in channel_order])
         # Add uuid to job_name because it has to be unique.
         job_name = 'predict_project_{}_{}'.format(self.id, uuid.uuid1())
-        command = 'python -m rv.run predict {} {} {} {}'.format(
-            inference_graph_uri, label_map_uri, source_uris_str,
+        command = 'python -m rv.detection.run predict --channel-order {} {} {} {} {}'.format(  # noqa
+            channel_order, inference_graph_uri, label_map_uri, source_uris_str,
             predictions_uri)
         job_id = rv_batch_client.start_raster_vision_job(job_name, command)
 

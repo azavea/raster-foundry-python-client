@@ -1,4 +1,8 @@
+from future.standard_library import install_aliases  # noqa
+install_aliases()  # noqa
+from urllib.parse import urlparse
 import json
+import StringIO
 
 import boto3
 from botocore.exceptions import ClientError
@@ -96,3 +100,17 @@ def unauthorize_bucket(bucket_name):
         resp = {'ResponseMetadata': {'HTTPStatusCode': 204}}
 
     return resp['ResponseMetadata']['HTTPStatusCode']
+
+
+def download_to_string(uri):
+    parsed_uri = urlparse(uri)
+    if parsed_uri.scheme == 's3':
+        try:
+            str_file = StringIO.StringIO()
+            s3.download_fileobj(
+                parsed_uri.netloc, parsed_uri.path[1:], str_file)
+            return str_file.getvalue()
+        finally:
+            str_file.close()
+    else:
+        raise ValueError('uri needs to be for s3')
