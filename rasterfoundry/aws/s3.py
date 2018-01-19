@@ -2,7 +2,7 @@ from future.standard_library import install_aliases  # noqa
 install_aliases()  # noqa
 from urllib.parse import urlparse
 import json
-import StringIO
+import io
 
 import boto3
 from botocore.exceptions import ClientError
@@ -106,11 +106,11 @@ def download_to_string(uri):
     parsed_uri = urlparse(uri)
     if parsed_uri.scheme == 's3':
         try:
-            str_file = StringIO.StringIO()
+            file_buffer = io.BytesIO()
             s3.download_fileobj(
-                parsed_uri.netloc, parsed_uri.path[1:], str_file)
-            return str_file.getvalue()
+                parsed_uri.netloc, parsed_uri.path[1:], file_buffer)
+            return str(file_buffer.getvalue())
         finally:
-            str_file.close()
+            file_buffer.close()
     else:
         raise ValueError('uri needs to be for s3')

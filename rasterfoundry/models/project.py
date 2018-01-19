@@ -1,12 +1,14 @@
 """A Project is a collection of zero or more scenes"""
 import requests
 import uuid
+import json
+import copy
 
 from .. import NOTEBOOK_SUPPORT
 from ..decorators import check_notebook
 from ..exceptions import GatewayTimeoutException
 from .map_token import MapToken
-
+from ..aws.s3 import download_to_string
 
 if NOTEBOOK_SUPPORT:
     from ipyleaflet import (
@@ -167,6 +169,23 @@ class Project(object):
             scheme=self.api.scheme, host=self.api.tile_host,
             tile_path=tile_path, token=self.api.api_token
         )
+
+    def post_annotations(self, annotations_uri):
+        annotations = json.loads(download_to_string(annotations_uri))
+        # Convert annotations to RF format.
+        rf_annotations = copy.deepcopy(annotations)
+        for feature in rf_annotations['features']:
+            properties = feature['properties']
+            feature['properties'] = {
+                'label': properties['class_name'],
+                'description': '',
+                'machineGenerated': True,
+                'confidence': properties['score'],
+                'quality': 'YES'
+            }
+
+        self.api.client.Imagery.post_projects_uuid_annotations(
+            uuid=self.id, annotations=rf_annotations).future.result()
 
     def get_image_source_uris(self):
         """Return the sourceUris of images associated with this project"""
