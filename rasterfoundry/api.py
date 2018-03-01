@@ -1,19 +1,27 @@
-import os
 import json
+import os
 import uuid
 
-from bravado.requests_client import RequestsClient
 from bravado.client import SwaggerClient
-from bravado.swagger_model import load_file
+from bravado.requests_client import RequestsClient
+from bravado.swagger_model import load_file, load_url
 from simplejson import JSONDecodeError
 
-from .models import Project, MapToken, Analysis
-from .exceptions import RefreshTokenException
 from .aws.s3 import str_to_file
+from .exceptions import RefreshTokenException
+from .models import Analysis, MapToken, Project
 from .settings import RV_TEMP_URI
 
-SPEC_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                         'spec.yml')
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+
+
+SPEC_PATH = os.getenv(
+    'RF_API_SPEC_PATH',
+    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/master/spec.yml'
+)
 
 
 class API(object):
@@ -34,7 +42,10 @@ class API(object):
         self.http = RequestsClient()
         self.scheme = scheme
 
-        spec = load_file(SPEC_PATH)
+        if urlparse(SPEC_PATH).netloc:
+            spec = load_url(SPEC_PATH)
+        else:
+            spec = load_file(SPEC_PATH)
 
         spec['host'] = host
         spec['schemes'] = [scheme]

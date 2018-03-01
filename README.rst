@@ -21,6 +21,17 @@ Usage
    # Get TMS URl without token
    one_project.tms()
 
+Versions
+~~~~~~~~
+
+The latest version of `rasterfoundry` always points to the most recently released swagger spec in
+the raster-foundry/raster-foundy-api-spec repository. If you need to point to a different spec
+version, either install a version of the python client that refers to the appropriate spec, or
+set the `RF_API_SPEC_PATH` environment variable to a url or local file path pointing to the
+version of the spec that you want to use.
+
+Generally this shouldn't matter, because the Raster Foundry API shouldn't have breaking changes.
+
 
 Installation
 ------------
