@@ -10,7 +10,7 @@ from simplejson import JSONDecodeError
 
 from .aws.s3 import str_to_file
 from .exceptions import RefreshTokenException
-from .models import Analysis, MapToken, Project, Export
+from .models import Analysis, MapToken, Project, Export, Datasource
 from .settings import RV_TEMP_URI
 
 try:
@@ -18,10 +18,10 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-
 SPEC_PATH = os.getenv(
     'RF_API_SPEC_PATH',
-    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/1.4.0/spec/spec.yml'
+    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/feature' +
+    '/asu/update-first-class-objects-crud-specs/spec/spec.yml'
 )
 
 
@@ -167,8 +167,11 @@ class API(object):
                 exports.append(Export(export, self))
         return exports
 
-    def get_datasources(self, **kwargs):
-        return self.client.Datasources.get_datasources(**kwargs).result()
+    def get_datasources(self):
+        datasources = []
+        for datasource in self.client.Datasources.get_datasources().result().results:
+            datasources.append(Datasource(datasource, self))
+        return datasources
 
     def get_scenes(self, **kwargs):
         bbox = kwargs.get('bbox')
