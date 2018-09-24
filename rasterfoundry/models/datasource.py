@@ -69,4 +69,9 @@ class Datasource(object):
                 }
             }
         )
-        return api.client.Datasources.post_datasources(Datasource=datasource_created).result()
+        return api.client.Datasources.post_datasources(datasource=datasource_created).result()
+
+    @classmethod
+    def update(cls, api, datasource_id, datasource):
+        return api.client.Datasources.put_datasources_datasourceID(
+            datasourceID=datasource_id, datasource=datasource).result()

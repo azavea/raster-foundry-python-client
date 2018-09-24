@@ -20,8 +20,7 @@ except ImportError:
 
 SPEC_PATH = os.getenv(
     'RF_API_SPEC_PATH',
-    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/feature' +
-    '/asu/update-first-class-objects-crud-specs/spec/spec.yml'
+    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/feature/asu/update-first-class-object-crud-spec/spec/spec.yml'  # NOQA
 )
 
 
@@ -172,6 +171,10 @@ class API(object):
         for datasource in self.client.Datasources.get_datasources().result().results:
             datasources.append(Datasource(datasource, self))
         return datasources
+
+    def get_datasource_by_id(self, datasource_id):
+        return self.client.Datasources.get_datasources_datasourceID(
+            datasourceID=datasource_id).result()
 
     def get_scenes(self, **kwargs):
         bbox = kwargs.get('bbox')
