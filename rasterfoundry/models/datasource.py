@@ -75,3 +75,8 @@ class Datasource(object):
     def update(cls, api, datasource_id, datasource):
         return api.client.Datasources.put_datasources_datasourceID(
             datasourceID=datasource_id, datasource=datasource).result()
+
+    @classmethod
+    def delete(cls, api, datasource_id):
+        return api.client.Datasources.delete_datasources_datasourceID(
+            datasourceID=datasource_id).result()

@@ -20,7 +20,7 @@ except ImportError:
 
 SPEC_PATH = os.getenv(
     'RF_API_SPEC_PATH',
-    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/feature/asu/update-first-class-object-crud-spec/spec/spec.yml'  # NOQA
+    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/1.4.0/spec/spec.yml'  # NOQA
 )
 
 
