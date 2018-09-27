@@ -35,7 +35,8 @@ class Export(object):
     @property
     def files(self):
         try:
-            fnames_res = self.api.client.Imagery.get_exports_uuid_files(uuid=self.id).result()
+            fnames_res = self.api.client.Imagery.get_exports_exportID_files(
+                exportID=self.id).result()
             fnames = filter(
                 lambda name: name.upper() != 'RFUploadAccessTestFile'.upper(),
                 fnames_res)
@@ -74,11 +75,11 @@ class Export(object):
                 'function will never return. You may have left off FAILED by accident. '
                 'If that is the case, you should include FAILED in until and try again.'
             )
-        export = api.client.Imagery.get_exports_uuid(uuid=export_id).result()
+        export = api.client.Imagery.get_exports_exportID(exportID=export_id).result()
         while export.exportStatus not in until:
             time.sleep(delay)
-            export = api.client.Imagery.get_exports_uuid(
-                uuid=export_id).result()
+            export = api.client.Imagery.get_exports_exportID(
+                exportID=export_id).result()
         return Export(export, api)
 
     @classmethod

@@ -162,8 +162,8 @@ class Analysis(object):
             # fetch first one from api and use that project's coordinates
             input = inputs.pop()
             project = Project(
-                self.api.client.Imagery.get_projects_uuid(
-                    uuid=input.get('projId')
+                self.api.client.Imagery.get_projects_projectID(
+                    projectID=input.get('projId')
                 ).result(),
                 self.api
             )

@@ -189,13 +189,13 @@ class Project(object):
                 'confidence': properties['score']
             }
 
-        self.api.client.Imagery.post_projects_uuid_annotations(
-            uuid=self.id, annotations=rf_annotations).future.result()
+        self.api.client.Imagery.post_projects_projectID_annotations(
+            projectID=self.id, annotations=rf_annotations).future.result()
 
     def get_annotations(self):
         def get_page(page):
-            return self.api.client.Imagery.get_projects_uuid_annotations(
-                uuid=self.id, page=page).result()
+            return self.api.client.Imagery.get_projects_projectID_annotations(
+                projectID=self.id, page=page).result()
 
         return get_all_paginated(get_page, list_field='features')
 
@@ -214,15 +214,15 @@ class Project(object):
 
     def get_scenes(self):
         def get_page(page):
-            return self.api.client.Imagery.get_projects_uuid_scenes(
-                uuid=self.id, page=page).result()
+            return self.api.client.Imagery.get_projects_projectID_scenes(
+                projectID=self.id, page=page).result()
 
         return get_all_paginated(get_page)
 
     def get_ordered_scene_ids(self):
         def get_page(page):
-            return self.api.client.Imagery.get_projects_uuid_order(
-                uuid=self.id, page=page).result()
+            return self.api.client.Imagery.get_projects_projectID_order(
+                projectID=self.id, page=page).result()
 
         # Need to reverse so that order is from bottom-most to top-most layer.
         return list(reversed(get_all_paginated(get_page)))

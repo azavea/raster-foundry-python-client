@@ -20,7 +20,7 @@ except ImportError:
 
 SPEC_PATH = os.getenv(
     'RF_API_SPEC_PATH',
-    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/1.4.0/spec/spec.yml'  # NOQA
+    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/1.11.0/spec/spec.yml'  # NOQA
 )
 
 
@@ -203,7 +203,7 @@ class API(object):
         project_configs = []
         for project_ind, project_id in enumerate(project_ids):
             proj = Project(
-                self.client.Imagery.get_projects_uuid(uuid=project_id).result(),
+                self.client.Imagery.get_projects_projectID(projectID=project_id).result(),
                 self)
 
             if annotations_uris is None:
