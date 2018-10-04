@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-Unreleased(https://github.com/raster-foundry/raster-foundry/tree/develop)
--------------------------------------------------------------------------
+`Unreleased <https://github.com/raster-foundry/raster-foundry/tree/develop>`__
+------------------------------------------------------------------------------
 
 Added
 ~~~~~
