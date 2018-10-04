@@ -12,7 +12,7 @@ Changed
 
 -  Switched to `keepachangelog <https://keepachangelog.com/en/1.0.0/>`__
    CHANGELOG format
-   `#xx <https://github.com/raster-foundry/raster-foundry-api-spec/pull/xx>`__
+   `#69 <https://github.com/raster-foundry/raster-foundry-api-spec/pull/69>`__
 
 Deprecated
 ~~~~~~~~~~
