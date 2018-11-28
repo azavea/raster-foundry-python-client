@@ -82,7 +82,7 @@ class API(object):
 
         try:
             response = self.client.Authentication.post_tokens(
-                refreshToken=post_body).future.result()
+                authBody=post_body).future.result()
             return response.json()['id_token']
         except JSONDecodeError:
             raise RefreshTokenException('Error using refresh token, please '
