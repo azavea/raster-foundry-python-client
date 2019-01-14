@@ -19,6 +19,8 @@ Removed
 Fixed
 ~~~~~
 
+- Made authentication POST body correct for the authentication API `#71 <https://github.com/raster-foundry/raster-foundry-api-spec/pull/71>`__
+
 Security
 ~~~~~~~~
 
