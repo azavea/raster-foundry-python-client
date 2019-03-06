@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="rasterfoundry",
-    version="1.16.2",
+    use_scm_version=True,
     description='A Python client for Raster Foundry, a web platform for '
     'combining, analyzing, and publishing raster data.',
     long_description=open('README.rst').read(),
@@ -37,5 +37,6 @@ setuptools.setup(
         'dev': [],
         'test': [],
     },
-    tests_require=[]
+    setup_requires=['setuptools_scm'],
+    tests_require=[],
 )
