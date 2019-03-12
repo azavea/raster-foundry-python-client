@@ -2,7 +2,7 @@
 name: Release
 about: When ready to cut a release
 title: Release X.Y.Z
-labels: ''
+labels: 'release'
 assignees: ''
 
 ---
@@ -13,12 +13,7 @@ $ git flow release start X.Y.Z
 ```
 - [ ] Edit `setup.py` to reflect the version of this release
 - [ ] Bump spec version (if applicable)
-- [ ] Rotate `CHANGELOG.rst`:
-* copy everything from unreleased into a new section for the release number you're working on. This should include a link to the tag in GitHub
-* remove unused sections, e.g., if there are no security changes
-* delete everything in the current unreleased section
-* create a fresh unreleased section at the top of the changelog
-- [ ] Ensure outstanding changes are committed:
+- [ ] Rotate `CHANGELOG.rst` (following [Keep a Changelog](https://keepachangelog.com/) principles)
 ```bash
 $ git add .
 $ git commit -m "X.Y.Z"
