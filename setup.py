@@ -37,6 +37,6 @@ setuptools.setup(
         'dev': [],
         'test': [],
     },
-    setup_requires=['setuptools_scm'],
+    setup_requires=['setuptools_scm==3.*'],
     tests_require=[],
 )
