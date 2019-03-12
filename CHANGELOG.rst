@@ -7,6 +7,9 @@ Change Log
 Added
 ~~~~~
 
+-  Use setuptools_scm to manage Python package version
+   `#76 <https://github.com/raster-foundry/raster-foundry-python-client/pull/76>`__
+
 Changed
 ~~~~~~~
 
