@@ -4,7 +4,7 @@ raster-foundry-python-client
 Deprecated
 ----------
 
-This Python client is no longer actively maintained or kept up-to-date with the latest Raster Foundry API changes. There is an actively maintained documentation page for the API that you can use to learn about and interact with the API [here](https://app.swaggerhub.com/apis/raster-foundry/raster-foundry/). You can learn about the latest features of Raster Foundry [here](https://rasterfoundry.azavea.com/).
+This Python client is no longer actively maintained or kept up-to-date with the latest Raster Foundry API changes. There is an actively maintained documentation page for the API that you can use to learn about and interact with the API `here <https://app.swaggerhub.com/apis/raster-foundry/raster-foundry/>`_. You can learn about the latest features of Raster Foundry `here <https://rasterfoundry.azavea.com/>`_.
 
 Usage
 -----
