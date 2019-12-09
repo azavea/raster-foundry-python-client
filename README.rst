@@ -1,7 +1,10 @@
 raster-foundry-python-client
 ============================
 
-A Python client for `Raster Foundry <https://www.rasterfoundry.com/>`_, a web platform for combining, analyzing, and publishing raster data.
+Deprecated
+----------
+
+This Python client is no longer actively maintained or kept up-to-date with the latest Raster Foundry API changes. There is an actively maintained documentation page for the API that you can use to learn about and interact with the API [here](https://app.swaggerhub.com/apis/raster-foundry/raster-foundry/). You can learn about the latest features of Raster Foundry [here](https://rasterfoundry.azavea.com/).
 
 Usage
 -----
